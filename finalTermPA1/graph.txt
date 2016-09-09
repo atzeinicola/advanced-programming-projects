@@ -1,0 +1,4 @@
+graph g {
+	n1 [label="Root"]; n2 [label="Child"]; n3 [label="Nephew"];
+	n1 -- n2[style=dotted,label="Parent"]--n3;
+}

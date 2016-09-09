@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <canvas id="myCanvas" width="600" height="400" style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.</canvas>
+
+    <script>
+    function Node (x,y,r,label,color) {
+        this.x = x, this.y = y, this.r = r, this.label = label, this.color = color;
+        this.printNode = function (ctx) {
+            //circle
+            ctx.beginPath();
+            ctx.arc(this.x,this.y,this.r,0,2*Math.PI);
+            ctx.closePath();
+            ctx.fillStyle=this.color;
+            ctx.fill();
+            ctx.strokeStyle="#000000";
+            ctx.stroke();
+            //label
+            ctx.textAlign="center";  
+            ctx.textBaseline="middle";
+            ctx.fillStyle="#000000";
+            ctx.fillText(this.label,this.x,this.y);
+        };
+    }
+
+    function Line (a,b,style,label,directed) {
+        this.a = a, this.b = b, this.style = style, this.label = label, this.directed = directed;
+        this.printLine = function (ctx) {
+            var angle = Math.atan2(b.y-a.y,b.x-a.x);
+            var fromX = a.x+a.r*Math.cos(angle)
+            var fromY = a.y+a.r*Math.sin(angle)
+            var toX = b.x-b.r*Math.cos(angle)
+            var toY = b.y-b.r*Math.sin(angle)
+            if (this.style=='dotted'){
+                ctx.strokeStyle="#000000";
+                drawDashedLine(ctx,fromX,fromY,toX,toY,[2,10]);
+            }
+            else {
+                ctx.beginPath();
+                ctx.moveTo(fromX,fromY);
+                ctx.lineTo(toX,toY);
+                ctx.closePath();
+                ctx.strokeStyle="#000000";
+                ctx.stroke();
+            }
+            if (directed) {
+                ctx.beginPath()
+                ctx.moveTo(toX,toY);
+                ctx.lineTo(toX-10*Math.cos(angle-Math.PI/6),toY-10*Math.sin(angle-Math.PI/6));
+                ctx.moveTo(toX, toY);
+                ctx.lineTo(toX-10*Math.cos(angle+Math.PI/6),toY-10*Math.sin(angle+Math.PI/6));
+                ctx.closePath()
+                ctx.strokeStyle="#000000";
+                ctx.stroke();
+            }
+            //label
+            var x = (fromX + toX)/2;
+            var y = (fromY + toY)/2;
+            ctx.textAlign="center";  
+            ctx.textBaseline="middle";
+            ctx.fillStyle="#000000";
+            ctx.fillText(this.label,x,y);
+        };
+    }
+
+    function drawDashedLine(context, fromX, fromY, toX, toY, dashPattern) {
+        var dx = toX - fromX;
+	    var dy = toY - fromY;
+	    var angle = Math.atan2(dy, dx);
+	    var x = fromX;
+	    var y = fromY;
+	    var idx = 0;
+	    var draw = true;	
+	    context.beginPath();
+	    context.moveTo(fromX, fromY);
+	    while (!((dx < 0 ? x <= toX : x >= toX) && (dy < 0 ? y <= toY : y >= toY))) {
+		    var dashLength = dashPattern[idx++ % dashPattern.length];
+		    var nx = x + (Math.cos(angle) * dashLength);
+		    x = dx < 0 ? Math.max(toX, nx) : Math.min(toX, nx);
+		    var ny = y + (Math.sin(angle) * dashLength);
+		    y = dy < 0 ? Math.max(toY, ny) : Math.min(toY, ny);
+		    if (draw) context.lineTo(x, y);
+		    else context.moveTo(x, y);
+		    draw = !draw;
+	    }     
+	    context.closePath();
+	    context.stroke();
+    };
+
+    
+    /* Stampa diagramma */
+    function printDiagram(ctx,node,line) {
+      for(var i=0; i<line.length; i++)  line[i].printLine(ctx);
+      for(var i=0; i<node.length; i++)  node[i].printNode(ctx);
+    };
+
+    var canvas=document.getElementById("myCanvas");
+    var ctx=canvas.getContext("2d");
+
+    var lines = new Array();
+    var nodes = new Array();
+
+    var n1 = new Node(200,50,40,"Root","#ffffff");
+    var n2 = new Node(200,200,40,"Child","#ffffff");
+    var n3 = new Node(300,350,40,"Nephew","#ffffff");
+    nodes[0] = n1;
+    nodes[1] = n2;
+    nodes[2] = n3;
+
+    var l1 = new Line(n1,n2,"dotted","",true);
+    var l2 = new Line(n2,n3,"","Parent",true);
+    var l3 = new Line(n1,n3,"","GranParent");
+
+    lines[0] = l1;
+    lines[1] = l2;
+    lines[2] = l3;
+
+    printDiagram(ctx,nodes,lines);     
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,4 @@
+digraph g {
+	n1 [label="Top"]; n2 [label="Left"]; n3 [label="Right"];
+	n1 -> n2; n1 -> n3;
+}
